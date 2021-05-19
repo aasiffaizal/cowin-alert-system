@@ -12,4 +12,4 @@ venv/
 *.db
 .DS_Store
 .env
-.pytest_cache/v/cache/*
+.pytest_cache/
