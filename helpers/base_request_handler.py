@@ -4,15 +4,18 @@ import urllib3
 from urllib.parse import urlencode
 import json
 from typing import Optional
+from config import APP
+
+CONFIG = APP['base_request_handler']
 
 
 class BaseRequestHandler(metaclass=ABCMeta):
     ALLOWED_REQUEST_TYPES = ['GET', 'POST', 'PUT', 'DELETE']
-    TIMEOUT = 60
+    TIMEOUT = CONFIG['timeout']
     HEADERS = {}
     PARAMS = {}
     BODY = {}
-    METHOD = 'GET'
+    METHOD = CONFIG['default_method']
     FIRE_ON_INIT = True
 
     def __init__(self):
@@ -27,10 +30,7 @@ class BaseRequestHandler(metaclass=ABCMeta):
 
     def get_headers(self) -> dict:
         headers = copy.deepcopy(self.HEADERS)
-        headers['User-Agent'] = (
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) '
-            'AppleWebKit/537.36 (KHTML, like Gecko) '
-            'Chrome/90.0.4430.85 Safari/537.36')
+        headers['User-Agent'] = CONFIG['user_agent']
         return headers
 
     def get_params(self) -> (Optional[str], Optional[str]):

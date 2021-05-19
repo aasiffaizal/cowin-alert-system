@@ -1,5 +1,6 @@
 base_request_handler:
   timeout: 60
+  default_method: GET
   user_agent: >-
     Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6)
     AppleWebKit/537.36 (KHTML, like Gecko)
