@@ -12,11 +12,11 @@ jobs:
   build:
     name: Run Python Tests
     runs-on: ${{ matrix.os }}
-
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
     steps:
-
     - uses: actions/checkout@v2
-
     - name: Setup timezone
       uses: zcong1993/setup-timezone@master
       with:
