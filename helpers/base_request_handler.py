@@ -16,16 +16,21 @@ class BaseRequestHandler(metaclass=ABCMeta):
     PARAMS = {}
     BODY = {}
     METHOD = CONFIG['default_method']
-    FIRE_ON_INIT = True
 
-    def __init__(self):
+    @abstractmethod
+    def __init__(self, relative_url=None, method=None, headers=None,
+                 params=None, body=None):
         self.response = None
-        if self.FIRE_ON_INIT:
-            self.response = self.fire_request()
+        self.relative_url = relative_url if relative_url else None
+        self.METHOD = method if method else self.METHOD
+        self.PARAMS = params if params else self.PARAMS
+        self.HEADERS = headers if headers else self.HEADERS
+        self.BODY = body if body else self.BODY
+        self.response = self.fire_request()
 
     @property
     @abstractmethod
-    def url(self) -> str:
+    def base_url(self) -> str:
         pass
 
     def get_headers(self) -> dict:
@@ -48,11 +53,12 @@ class BaseRequestHandler(metaclass=ABCMeta):
             body = json.dumps(self.BODY).encode('utf-8')
         return body
 
-    def fire_request(self) -> any:
+    def fire_request(self) -> dict:
         self.validate_method_type()
         fields, encoded_params = self.get_params()
         http = urllib3.PoolManager()
-        url = self.url
+        url = (self.base_url + self.relative_url
+               if self.relative_url else self.base_url)
         if encoded_params:
             url += '?{}'.format(encoded_params)
         response = http.request(
@@ -60,8 +66,6 @@ class BaseRequestHandler(metaclass=ABCMeta):
             headers=self.get_headers(), fields=fields, timeout=self.TIMEOUT)
         if response.status > 400:
             raise Exception
-        if self.FIRE_ON_INIT:
-            self.response = response
         return self.response_handler(response)
 
     def validate_method_type(self) -> None:
@@ -69,5 +73,5 @@ class BaseRequestHandler(metaclass=ABCMeta):
             raise ValueError
 
     @abstractmethod
-    def response_handler(self, response) -> any:
+    def response_handler(self, response) -> dict:
         pass
