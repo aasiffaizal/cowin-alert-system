@@ -16,7 +16,7 @@ engine = create_engine(
 session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_table_name(name):
+def get_table_name(name: str) -> str:
     return inflection.underscore(name)
 
 
