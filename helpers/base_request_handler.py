@@ -3,24 +3,30 @@ import copy
 import urllib3
 from urllib.parse import urlencode
 import json
-from typing import Optional
+from typing import Optional, List, Tuple
+from custom_types import JsonType
 from config import APP
 
 CONFIG = APP['base_request_handler']
 
 
 class BaseRequestHandler(metaclass=ABCMeta):
-    ALLOWED_REQUEST_TYPES = ['GET', 'POST', 'PUT', 'DELETE']
+    ALLOWED_REQUEST_TYPES: List[str] = ['GET', 'POST', 'PUT', 'DELETE']
     TIMEOUT = CONFIG['timeout']
-    HEADERS = {}
-    PARAMS = {}
-    BODY = {}
-    METHOD = CONFIG['default_method']
+    HEADERS: JsonType = {}
+    PARAMS: JsonType = {}
+    BODY: JsonType = {}
+    METHOD: str = CONFIG['default_method']
 
     @abstractmethod
-    def __init__(self, relative_url=None, method=None, headers=None,
-                 params=None, body=None):
-        self.response = None
+    def __init__(
+        self, relative_url: str = None,
+        method: str = None,
+        headers: JsonType = None,
+        params: JsonType = None,
+        body: JsonType = None
+    ) -> None:
+        self.response = {}
         self.relative_url = relative_url if relative_url else None
         self.METHOD = method if method else self.METHOD
         self.PARAMS = params if params else self.PARAMS
@@ -33,12 +39,12 @@ class BaseRequestHandler(metaclass=ABCMeta):
     def base_url(self) -> str:
         pass
 
-    def get_headers(self) -> dict:
+    def get_headers(self) -> JsonType:
         headers = copy.deepcopy(self.HEADERS)
         headers['User-Agent'] = CONFIG['user_agent']
         return headers
 
-    def get_params(self) -> (Optional[str], Optional[str]):
+    def get_params(self) -> Tuple[Optional[JsonType], Optional[str]]:
         fields, encoded_params = None, None
         if self.PARAMS:
             if self.METHOD in ['POST', 'PUT']:
@@ -47,13 +53,13 @@ class BaseRequestHandler(metaclass=ABCMeta):
                 fields = self.PARAMS
         return fields, encoded_params
 
-    def get_body(self) -> Optional[str]:
+    def get_body(self) -> Optional[bytes]:
         body = None
         if self.BODY:
             body = json.dumps(self.BODY).encode('utf-8')
         return body
 
-    def fire_request(self) -> dict:
+    def fire_request(self) -> JsonType:
         self.validate_method_type()
         fields, encoded_params = self.get_params()
         http = urllib3.PoolManager()
@@ -73,5 +79,5 @@ class BaseRequestHandler(metaclass=ABCMeta):
             raise ValueError
 
     @abstractmethod
-    def response_handler(self, response) -> dict:
+    def response_handler(self, response) -> JsonType:
         pass
