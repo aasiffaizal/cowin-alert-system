@@ -1,8 +1,11 @@
 import inflection
+
+from config import APP
+from contextlib import contextmanager
 from sqlalchemy import create_engine, Column, Integer, TIMESTAMP, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declared_attr
-from config import APP
+from typing import Generator
 
 CONFIG = APP['database']
 
@@ -35,3 +38,13 @@ class BaseModel:
 
 
 Base = declarative_base(cls=BaseModel)
+
+
+@contextmanager
+def db_session() -> Generator:
+    """Provide a transactional scope around a series of operations."""
+    _session = session()
+    try:
+        yield _session
+    finally:
+        _session.close()

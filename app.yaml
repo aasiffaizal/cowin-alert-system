@@ -7,3 +7,9 @@ base_request_handler:
     Chrome/90.0.4430.85 Safari/537.36
 database:
   url: sqlite:///./cowin.db
+
+test:
+  database:
+    url: sqlite:///./test.db
+    path: ./test.db
+
